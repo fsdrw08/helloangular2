@@ -6,7 +6,7 @@ import {v4 as UUID} from 'uuid';
   providedIn: 'root'
 })
 export class TodoService {
-	todos: Todo[];
+	todos: Todo[]=[];
 
 	 constructor() { }
 	
