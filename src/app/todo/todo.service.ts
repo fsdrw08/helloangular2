@@ -28,8 +28,8 @@ export class TodoService {
 
 		return this.http
 			.post(this.api_url, JSON.stringify(todo), {headers: this.headers})
-			.toPromise
-			.then(res => res.json().data as Todo)
+			.toPromise() //https://stackoverflow.com/questions/40985605/property-then-does-not-exist-on-type-observable
+			//.then(res as Todo) //https://stackoverflow.com/questions/46005430/property-json-does-not-exist-on-type-object
 			.catch(this.handleError);
 	}
 	private handleError(error: any): Promise<any> {

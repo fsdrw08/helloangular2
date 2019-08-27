@@ -18,8 +18,11 @@ export class TodoComponent implements OnInit {
   }
   
   addTodo(){
-    //this.todos.push({id: 1, desc: this.desc, completed: false});
-    this.todos=this.todoService.addTodo(this.desc); 
-    this.desc='';
+    this.todoService
+      .addTodo(this.desc)
+      .then(todo => {
+        this.todos = [...this.todos, todo];
+        this.desc = '';
+      });
   }
 }
