@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import {Todo} from './todo.model';
 import {v4 as UUID} from 'uuid';
-//import 'rxjs/add/operator/toPromise';
+import {Observable, of} from 'rxjs';
+import {catchError, map, tap} from 'rxjs/operators';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import { promise } from 'protractor';
 
@@ -11,43 +12,33 @@ import { promise } from 'protractor';
 })
 export class TodoService {
 	private api_url='api/todos';
-	private headers=new HttpHeaders({
-		'Content-Type':'application/json'
-	});
+	private headers= {
+		headers: new HttpHeaders({'Content-Type':'application/json'})
+	  };
 	constructor(private http: HttpClient) { }
 	//todos: Todo[]=[];
 
 	
 	// POST /todos
-	addTodo(desc:string): Promise<Todo> {
-	  let todo = {
-	    id : UUID(),
-	    desc: desc, 
-	    completed: false 
-	  }; 
-
-		return this.http
-			.put(this.api_url, JSON.stringify(todo), {headers: this.headers})
-			.toPromise() //https://stackoverflow.com/questions/40985605/property-then-does-not-exist-on-type-observable
-			//.then(res => res as Todo) //https://stackoverflow.com/questions/46005430/property-json-does-not-exist-on-type-object
-			.catch(this.handleError);
+	addTodo(todo: Todo): Observable<Todo> {
+		return this.http.post<Todo>(this.api_url,todo,this.headers).pipe(
+			//this.handleError)
+			catchError(this.handleError<Todo>('addTodo'))
+		)
 	}
 
 	//put /todo/:id
-	toggleTodo(todo: Todo): Promise<Todo> {
-		const url = `${this.api_url}/${todo.id}`;
-		console.log(url);
-		let updatedTodo = Object.assign({}, todo, {completed: !todo.completed});
-		return this.http
-			.put(url, JSON.stringify(updatedTodo), {headers: this.headers})
-			.toPromise()
-			.then(()=> updatedTodo)
-			.catch(this.handleError);
+	updateTodo(todo: Todo): Observable<Todo> {
+		return this.http.put(this.api_url,todo,this.headers).pipe(
+			catchError(this.handleError<any>('updateTodo'))
+		)
 	}
 
-	private handleError(error: any): Promise<any> {
-		console.error('An error occurred', error); 
-		return Promise.reject(error.message || error);
+	private handleError<T> (operation = 'operation', result?: T) {
+		return (error: any): Observable<T> => {
+			console.error(error);
+			return of(result as T);
+		};
 	  }
 }
 
